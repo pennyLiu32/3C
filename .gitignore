@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# 環境變數 / 密碼
+.env
+
+# 作業系統
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
