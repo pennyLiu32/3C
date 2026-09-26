@@ -28,3 +28,15 @@ CREATE TABLE IF NOT EXISTS price_history (
     UNIQUE KEY uk_product_date (product_id, crawl_date),
     INDEX idx_crawl_date (crawl_date)
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS crawl_log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    category VARCHAR(50) NOT NULL,
+    run_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    item_count INT NOT NULL DEFAULT 0,
+    success_count INT NOT NULL DEFAULT 0,
+    skipped_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL,
+    message TEXT,
+    INDEX idx_category_run (category, run_at)
+) ENGINE=InnoDB;

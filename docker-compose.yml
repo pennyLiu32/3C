@@ -1,20 +1,117 @@
-version: "3.8"
-
 services:
   mysql:
     image: mysql:8.0
     container_name: tk3c_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: zxcvbnm+1013
-      MYSQL_DATABASE: tk3c_price_tracker
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: tk3c_user
-      MYSQL_PASSWORD: 123456
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Taipei
+    command: --default-time-zone='+08:00'
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: tk3c_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: tk3c_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  flower:
+    image: mher/flower:2.0
+    container_name: tk3c_flower
+    command: celery --broker=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672// flower
+    environment:
+      TZ: Asia/Taipei
+    ports:
+      - "5555:5555"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  api:
+    build: .
+    container_name: tk3c_api
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      TZ: Asia/Taipei
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+
+  celery-worker:
+    build: .
+    container_name: tk3c_celery_worker
+    restart: unless-stopped
+    command: celery -A celery_app worker --loglevel=info -E
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      RABBITMQ_HOST: rabbitmq
+      TZ: Asia/Taipei
+    depends_on:
+      - mysql
+      - rabbitmq
+    volumes:
+      - .:/app
+
+  celery-beat:
+    build: .
+    container_name: tk3c_celery_beat
+    restart: unless-stopped
+    command: celery -A celery_app beat --loglevel=info --schedule=/app/celerybeat-data/celerybeat-schedule
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      RABBITMQ_HOST: rabbitmq
+      TZ: Asia/Taipei
+    depends_on:
+      - mysql
+      - rabbitmq
+      - celery-worker
+    volumes:
+      - .:/app
+      - celerybeat_data:/app/celerybeat-data
+
 volumes:
   mysql_data:
+  celerybeat_data:

@@ -55,7 +55,7 @@ tk3c-price-tracker/
 
 - [x] 完成冰箱、電視、氣炸鍋、掃地機器人四大分類的爬蟲程式
 - [x] MySQL 資料庫架構設計（products + price_history）
-- [ ] 排程自動化（規劃使用 Celery + Redis + Flower）
+- [x] 排程自動化（規劃使用 Celery + RabbitMQ + Flower）
 - [ ] 價格走勢查詢介面
 
 ## 未來規劃

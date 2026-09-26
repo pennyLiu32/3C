@@ -82,8 +82,27 @@ KNOWN_BRANDS = [
 ]
 
 
+# 網站有時會在商品名稱最前面加上限時促銷字樣（例如「只殺今天」「夜間偷殺」），
+# 這些字會直接黏在廠牌前面，若不先剝除，會被誤判成廠牌的一部分
+PROMO_PREFIXES = ["只殺今天", "夜間偷殺", "限時搶購", "限量搶購", "只殺一天"]
+
+
+def strip_promo_prefix(name):
+    """剝除商品名稱開頭黏著的行銷詞，避免污染廠牌判斷"""
+    stripped = True
+    while stripped:
+        stripped = False
+        for prefix in PROMO_PREFIXES:
+            if name.startswith(prefix):
+                name = name[len(prefix):]
+                stripped = True
+    return name
+
+
 def extract_brand(name):
     """從商品名稱裡拆解出廠牌"""
+    name = strip_promo_prefix(name)
+
     bracket_match = re.match(r"^【([^】]+)】", name)
     if bracket_match:
         return bracket_match.group(1).strip()
@@ -296,7 +315,8 @@ def enrich_with_details(products, category):
         details = fetch_product_details(p["link"])
 
         specs_text = " ｜ ".join(details["specs"]) if details["specs"] else ""
-        brand = extract_brand(p["name"])
+        clean_name = strip_promo_prefix(p["name"])
+        brand = extract_brand(clean_name)
         discount, price = parse_price(p["price"])
 
         row = {
@@ -306,7 +326,7 @@ def enrich_with_details(products, category):
             "商品編號": details["product_code"],
             "廠牌": brand,
             "型號": details["model"],
-            "商品名稱": p["name"],
+            "商品名稱": clean_name,
             "折扣": discount,
             "售價": price,
             "原價": details["original_price"],
@@ -335,7 +355,8 @@ def save_to_csv(data, filename):
     print(f"\n已儲存 {len(data)} 筆資料到 {filename}")
 
 
-if __name__ == "__main__":
+def run_airfryer_crawler():
+    """執行氣炸鍋爬蟲，回傳整理好的商品資料 list"""
     top_products, base_url = search_top_ranking(SEARCH_KEYWORD)
     print(f"\n===== 官網排名商品共 {len(top_products)} 筆 =====")
 
@@ -356,4 +377,9 @@ if __name__ == "__main__":
 
     products_with_details = enrich_with_details(all_products, CATEGORY)
 
-    save_to_csv(products_with_details, OUTPUT_FILE)
+    return products_with_details
+
+
+if __name__ == "__main__":
+    data = run_airfryer_crawler()
+    save_to_csv(data, OUTPUT_FILE)
