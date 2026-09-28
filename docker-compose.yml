@@ -32,6 +32,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: tk3c_rabbitmq
+    restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -47,6 +48,7 @@ services:
   flower:
     image: mher/flower:2.0
     container_name: tk3c_flower
+    restart: unless-stopped
     command: celery --broker=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672// flower
     environment:
       TZ: Asia/Taipei

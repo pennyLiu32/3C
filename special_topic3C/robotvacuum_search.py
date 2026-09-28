@@ -14,7 +14,7 @@ OUTPUT_FILE = "tk3c_robotvacuum_top20.csv"
 CATEGORY = "掃地機器人"
 SEARCH_KEYWORD = "掃地機器人"
 
-EXCLUDE_KEYWORDS = ["濾網", "邊刷", "主刷", "拖布", "集塵袋", "集塵盒", "電池", "充電座", "清潔劑", "清潔液", "消耗品", "配件包", "抹布", "尘勺", "耗材", "模塊", "模組", "專用"]
+EXCLUDE_KEYWORDS = ["濾網", "邊刷", "主刷", "滾刷", "組件", "拖布", "集塵袋", "集塵盒", "電池", "充電座", "清潔劑", "清潔液", "消耗品", "配件包", "抹布", "尘勺", "耗材", "模塊", "模組", "專用"]
 
 REQUIRE_SIZE_IN_NAME = False
 SIZE_PATTERN = re.compile(r"$^")  # 不會用到，保留變數避免程式其他地方參照出錯

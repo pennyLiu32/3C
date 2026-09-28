@@ -20,7 +20,7 @@
 
 ```
 tk3c-price-tracker/
-├── crawlers/
+├── special_topic3C/
 │   ├── fridge_search.py       # 冰箱分類爬蟲
 │   ├── tv_search.py           # 電視分類爬蟲
 │   ├── airfryer_search.py     # 氣炸鍋分類爬蟲
@@ -48,7 +48,7 @@ tk3c-price-tracker/
 3. 執行對應分類的爬蟲程式，例如：
 
    ```bash
-   python crawlers/fridge_search.py
+   python special_topic3C/fridge_search.py
    ```
 
 ## 目前進度

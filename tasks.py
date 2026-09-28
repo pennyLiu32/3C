@@ -1,5 +1,5 @@
 from celery_app import app
-from crawlers.fridge_search import run_fridge_crawler
+from special_topic3C.fridge_search import run_fridge_crawler
 from db import save_products_to_db, log_crawl_run
 
 @app.task(name="crawl_fridge")
@@ -16,9 +16,9 @@ def crawl_fridge():
     return message
 
 
-from crawlers.tv_search import run_tv_crawler
-from crawlers.airfryer_search import run_airfryer_crawler
-from crawlers.robotvacuum_search import run_robotvacuum_crawler
+from special_topic3C.tv_search import run_tv_crawler
+from special_topic3C.airfryer_search import run_airfryer_crawler
+from special_topic3C.robotvacuum_search import run_robotvacuum_crawler
 
 @app.task(name="crawl_tv")
 def crawl_tv():
